@@ -166,13 +166,12 @@ Item {
 
     BorderSurface {
       id: card
-      width: Math.min(Style.space(850), panel.width - Style.gapsOut * 2)
-      height: Math.min(Style.space(680), panel.height - Style.gapsOut * 2)
+      width: Math.min(1150, panel.width * 0.72)
+      height: Math.min(840, panel.height * 0.82)
       anchors.centerIn: parent
       color: root.background
       borderSpec: root.borderSpec
-      radius: Style.cornerRadius
-      padding: Style.spacing.panelPadding
+      radius: 16
 
       MouseArea {
         anchors.fill: parent
@@ -181,7 +180,7 @@ Item {
 
       Item {
         anchors.fill: parent
-        anchors.margins: Style.spacing.panelPadding
+        anchors.margins: 24
 
         // 1. Header Bar
         Item {
@@ -189,7 +188,7 @@ Item {
           anchors.top: parent.top
           anchors.left: parent.left
           anchors.right: parent.right
-          height: Style.space(36)
+          height: 44
 
           Text {
             anchors.left: parent.left
@@ -197,16 +196,16 @@ Item {
             text: "⌨️ Hyprland & Omarchy Keybindings"
             color: root.foreground
             font.bold: true
-            font.pixelSize: Style.font.title || 16
+            font.pixelSize: 20
           }
 
           Rectangle {
             anchors.right: closeBtn.left
-            anchors.rightMargin: Style.space(8)
+            anchors.rightMargin: 12
             anchors.verticalCenter: parent.verticalCenter
-            width: addText.implicitWidth + Style.space(16)
-            height: Style.space(28)
-            radius: Style.cornerRadius || 6
+            width: addText.implicitWidth + 24
+            height: 36
+            radius: 8
             color: root.accentColor
 
             Text {
@@ -215,7 +214,7 @@ Item {
               text: root.isEditing ? "Back to List" : "+ Add Shortcut"
               color: "#00070d"
               font.bold: true
-              font.pixelSize: Style.font.caption || 11
+              font.pixelSize: 13
             }
 
             MouseArea {
@@ -238,9 +237,9 @@ Item {
             id: closeBtn
             anchors.right: parent.right
             anchors.verticalCenter: parent.verticalCenter
-            width: Style.space(28)
-            height: Style.space(28)
-            radius: Style.cornerRadius || 6
+            width: 36
+            height: 36
+            radius: 8
             color: root.selectedBackground
 
             Text {
@@ -248,6 +247,7 @@ Item {
               text: "✕"
               color: root.foreground
               font.bold: true
+              font.pixelSize: 14
             }
 
             MouseArea {
@@ -262,24 +262,24 @@ Item {
         Rectangle {
           id: searchBox
           anchors.top: header.bottom
-          anchors.topMargin: Style.space(12)
+          anchors.topMargin: 16
           anchors.left: parent.left
           anchors.right: parent.right
-          height: Style.space(36)
-          radius: Style.cornerRadius || 8
+          height: 46
+          radius: 10
           color: root.selectedBackground
           border.color: searchInput.activeFocus ? root.accentColor : "transparent"
-          border.width: 1
+          border.width: 1.5
           visible: !root.isEditing
 
           TextInput {
             id: searchInput
             anchors.fill: parent
-            anchors.leftMargin: Style.space(12)
-            anchors.rightMargin: Style.space(12)
+            anchors.leftMargin: 16
+            anchors.rightMargin: 16
             verticalAlignment: TextInput.AlignVCenter
             color: root.foreground
-            font.pixelSize: Style.font.body || 13
+            font.pixelSize: 14
             clip: true
 
             Text {
@@ -287,7 +287,7 @@ Item {
               anchors.verticalCenter: parent.verticalCenter
               text: "Search shortcuts (e.g. SUPER + A, workspace, discord)..."
               color: Color.menu.textMuted || "#808580"
-              font.pixelSize: Style.font.body || 13
+              font.pixelSize: 14
               visible: !searchInput.text && !searchInput.activeFocus
             }
 
@@ -314,17 +314,17 @@ Item {
         Row {
           id: categoryTabs
           anchors.top: searchBox.bottom
-          anchors.topMargin: Style.space(10)
+          anchors.topMargin: 12
           anchors.left: parent.left
-          spacing: Style.space(8)
+          spacing: 10
           visible: !root.isEditing
 
           Repeater {
             model: ["All", "Launchers", "Navigation", "Windows", "Utilities"]
             delegate: Rectangle {
-              width: catText.implicitWidth + Style.space(16)
-              height: Style.space(26)
-              radius: Style.space(6)
+              width: catText.implicitWidth + 24
+              height: 32
+              radius: 8
               color: root.activeCategory === modelData ? root.accentColor : root.selectedBackground
 
               Text {
@@ -333,7 +333,7 @@ Item {
                 text: modelData
                 color: root.activeCategory === modelData ? "#00070d" : root.foreground
                 font.bold: root.activeCategory === modelData
-                font.pixelSize: Style.font.caption || 11
+                font.pixelSize: 13
               }
 
               MouseArea {
@@ -352,33 +352,33 @@ Item {
         ListView {
           id: listView
           anchors.top: categoryTabs.bottom
-          anchors.topMargin: Style.space(12)
+          anchors.topMargin: 14
           anchors.left: parent.left
           anchors.right: parent.right
           anchors.bottom: footer.top
-          anchors.bottomMargin: Style.space(8)
+          anchors.bottomMargin: 10
           visible: !root.isEditing
           clip: true
           model: listModel
-          spacing: Style.space(6)
+          spacing: 8
 
           delegate: Rectangle {
             width: listView.width
-            height: Style.space(52)
-            radius: Style.space(8)
-            color: root.selectedIndex === index ? root.selectedBackground : "transparent"
-            border.color: root.selectedIndex === index ? root.accentColor : "transparent"
+            height: 62
+            radius: 10
+            color: root.selectedIndex === index ? root.selectedBackground : "#0d131a"
+            border.color: root.selectedIndex === index ? root.accentColor : "#202830"
             border.width: 1
 
             // Key Combo Badge
             Rectangle {
               id: badge
               anchors.left: parent.left
-              anchors.leftMargin: Style.space(10)
+              anchors.leftMargin: 14
               anchors.verticalCenter: parent.verticalCenter
-              implicitWidth: comboLabel.implicitWidth + Style.space(16)
-              height: Style.space(28)
-              radius: Style.space(6)
+              implicitWidth: comboLabel.implicitWidth + 20
+              height: 34
+              radius: 8
               color: root.accentColor
 
               Text {
@@ -387,24 +387,24 @@ Item {
                 text: model.combo
                 color: "#00070d"
                 font.bold: true
-                font.pixelSize: Style.font.caption || 11
+                font.pixelSize: 12
               }
             }
 
             // Description & Action
             Column {
               anchors.left: badge.right
-              anchors.leftMargin: Style.space(12)
+              anchors.leftMargin: 16
               anchors.right: actionBtns.left
-              anchors.rightMargin: Style.space(8)
+              anchors.rightMargin: 12
               anchors.verticalCenter: parent.verticalCenter
-              spacing: Style.space(2)
+              spacing: 3
 
               Text {
                 text: model.description
                 color: root.foreground
                 font.bold: true
-                font.pixelSize: Style.font.body || 13
+                font.pixelSize: 14
                 elide: Text.ElideRight
                 width: parent.width
               }
@@ -412,7 +412,7 @@ Item {
               Text {
                 text: model.category + (model.arg ? " • " + model.arg : "")
                 color: Color.menu.textMuted || "#909590"
-                font.pixelSize: Style.font.caption || 10
+                font.pixelSize: 12
                 elide: Text.ElideRight
                 width: parent.width
               }
@@ -422,20 +422,20 @@ Item {
             Row {
               id: actionBtns
               anchors.right: parent.right
-              anchors.rightMargin: Style.space(10)
+              anchors.rightMargin: 14
               anchors.verticalCenter: parent.verticalCenter
-              spacing: Style.space(6)
+              spacing: 8
 
               Rectangle {
-                width: Style.space(32)
-                height: Style.space(26)
-                radius: Style.space(6)
+                width: 38
+                height: 32
+                radius: 8
                 color: root.selectedBackground
 
                 Text {
                   anchors.centerIn: parent
                   text: "✏️"
-                  font.pixelSize: Style.font.caption || 11
+                  font.pixelSize: 13
                 }
 
                 MouseArea {
@@ -451,15 +451,15 @@ Item {
               }
 
               Rectangle {
-                width: Style.space(32)
-                height: Style.space(26)
-                radius: Style.space(6)
+                width: 38
+                height: 32
+                radius: 8
                 color: root.selectedBackground
 
                 Text {
                   anchors.centerIn: parent
                   text: "🗑️"
-                  font.pixelSize: Style.font.caption || 11
+                  font.pixelSize: 13
                 }
 
                 MouseArea {
@@ -482,38 +482,39 @@ Item {
         Column {
           id: formView
           anchors.top: header.bottom
-          anchors.topMargin: Style.space(16)
+          anchors.topMargin: 20
           anchors.left: parent.left
           anchors.right: parent.right
           anchors.bottom: footer.top
           visible: root.isEditing
-          spacing: Style.space(14)
+          spacing: 16
 
           Text {
             text: "Edit / Add Keybinding"
             color: root.accentColor
             font.bold: true
-            font.pixelSize: Style.font.title || 16
+            font.pixelSize: 18
           }
 
           Text {
             text: "Key Combination (e.g. SUPER + SHIFT + Z):"
             color: root.foreground
-            font.pixelSize: Style.font.caption || 11
+            font.pixelSize: 13
           }
 
           Rectangle {
             width: parent.width
-            height: Style.space(36)
-            radius: Style.cornerRadius || 6
+            height: 44
+            radius: 8
             color: root.selectedBackground
 
             TextInput {
               id: formCombo
               anchors.fill: parent
-              anchors.margins: Style.space(10)
+              anchors.margins: 12
               verticalAlignment: TextInput.AlignVCenter
               color: root.foreground
+              font.pixelSize: 14
               text: root.editCombo
               onTextChanged: root.editCombo = text
             }
@@ -522,21 +523,22 @@ Item {
           Text {
             text: "Description (e.g. Launch Discord, Next Workspace):"
             color: root.foreground
-            font.pixelSize: Style.font.caption || 11
+            font.pixelSize: 13
           }
 
           Rectangle {
             width: parent.width
-            height: Style.space(36)
-            radius: Style.cornerRadius || 6
+            height: 44
+            radius: 8
             color: root.selectedBackground
 
             TextInput {
               id: formDesc
               anchors.fill: parent
-              anchors.margins: Style.space(10)
+              anchors.margins: 12
               verticalAlignment: TextInput.AlignVCenter
               color: root.foreground
+              font.pixelSize: 14
               text: root.editDesc
               onTextChanged: root.editDesc = text
             }
@@ -545,33 +547,34 @@ Item {
           Text {
             text: "Command / Action (e.g. omarchy-agent, https://x.com):"
             color: root.foreground
-            font.pixelSize: Style.font.caption || 11
+            font.pixelSize: 13
           }
 
           Rectangle {
             width: parent.width
-            height: Style.space(36)
-            radius: Style.cornerRadius || 6
+            height: 44
+            radius: 8
             color: root.selectedBackground
 
             TextInput {
               id: formAction
               anchors.fill: parent
-              anchors.margins: Style.space(10)
+              anchors.margins: 12
               verticalAlignment: TextInput.AlignVCenter
               color: root.foreground
+              font.pixelSize: 14
               text: root.editAction
               onTextChanged: root.editAction = text
             }
           }
 
           Row {
-            spacing: Style.space(12)
+            spacing: 14
 
             Rectangle {
-              width: saveBtnText.implicitWidth + Style.space(24)
-              height: Style.space(36)
-              radius: Style.cornerRadius || 6
+              width: saveBtnText.implicitWidth + 32
+              height: 42
+              radius: 8
               color: root.accentColor
 
               Text {
@@ -580,6 +583,7 @@ Item {
                 text: "💾 Save & Reload Hyprland"
                 color: "#00070d"
                 font.bold: true
+                font.pixelSize: 13
               }
 
               MouseArea {
@@ -590,9 +594,9 @@ Item {
             }
 
             Rectangle {
-              width: cancelBtnText.implicitWidth + Style.space(24)
-              height: Style.space(36)
-              radius: Style.cornerRadius || 6
+              width: cancelBtnText.implicitWidth + 32
+              height: 42
+              radius: 8
               color: root.selectedBackground
 
               Text {
@@ -600,6 +604,7 @@ Item {
                 anchors.centerIn: parent
                 text: "Cancel"
                 color: root.foreground
+                font.pixelSize: 13
               }
 
               MouseArea {
@@ -617,7 +622,7 @@ Item {
           anchors.bottom: parent.bottom
           anchors.left: parent.left
           anchors.right: parent.right
-          height: Style.space(24)
+          height: 28
 
           Text {
             anchors.left: parent.left
@@ -625,7 +630,7 @@ Item {
             text: root.statusMessage
             color: Color.menu.textMuted || "#808580"
             font.italic: true
-            font.pixelSize: Style.font.caption || 11
+            font.pixelSize: 12
           }
 
           Text {
@@ -633,7 +638,7 @@ Item {
             anchors.verticalCenter: parent.verticalCenter
             text: "Press Esc to exit"
             color: Color.menu.textMuted || "#808580"
-            font.pixelSize: Style.font.caption || 10
+            font.pixelSize: 11
           }
         }
       }
