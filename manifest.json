@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "id": "omarchy-keybinds",
+  "name": "Keybindings Manager",
+  "description": "Interactive GUI editor and visual search for Omarchy and Hyprland keyboard shortcuts",
+  "kinds": ["overlay"],
+  "entryPoints": {
+    "overlay": "Picker.qml"
+  },
+  "dependencies": [
+    "omarchy.commons"
+  ],
+  "capabilities": []
+}

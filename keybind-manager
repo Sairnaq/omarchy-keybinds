@@ -1,0 +1,151 @@
+#!/usr/bin/env python3
+"""Keybinding Manager Backend for Omarchy & Hyprland."""
+
+import json
+import os
+import re
+import shutil
+import subprocess
+import sys
+import time
+from pathlib import Path
+
+BINDINGS_FILE = Path.home() / ".config" / "hypr" / "bindings.lua"
+
+
+def get_live_binds() -> list[dict]:
+    """Fetch live bindings from Hyprland JSON API."""
+    try:
+        res = subprocess.run(["hyprctl", "binds", "-j"], capture_output=True, text=True, check=True)
+        raw = json.loads(res.stdout)
+    except Exception:
+        raw = []
+
+    parsed = []
+    for item in raw:
+        if item.get("mouse") or not item.get("key"):
+            continue
+
+        modmask = item.get("modmask", 0)
+        mods = []
+        if modmask & 64:
+            mods.append("SUPER")
+        if modmask & 1:
+            mods.append("SHIFT")
+        if modmask & 4:
+            mods.append("CTRL")
+        if modmask & 8:
+            mods.append("ALT")
+
+        key = item.get("key", "").upper()
+        combo = " + ".join(mods + [key]) if mods else key
+        desc = item.get("description") or item.get("arg") or item.get("dispatcher") or "Custom action"
+
+        # Categorize
+        category = "System"
+        lower_desc = desc.lower()
+        lower_key = key.lower()
+
+        if any(w in lower_desc for w in ["workspace", "scroll", "column", "left", "right", "up", "down", "focus"]):
+            category = "Navigation"
+        elif any(w in lower_desc for w in ["close", "fullscreen", "full width", "split", "pop", "float", "window"]):
+            category = "Windows"
+        elif any(w in lower_desc for w in ["browser", "terminal", "discord", "telegram", "obsidian", "antigravity", "lm studio", "x", "google", "launch", "editor"]):
+            category = "Launchers"
+        elif any(w in lower_desc for w in ["volume", "brightness", "screenshot", "recording", "menu", "theme", "clipboard", "emoji", "color", "lock", "voxtype"]):
+            category = "Utilities"
+
+        parsed.append({
+            "combo": combo,
+            "description": desc,
+            "dispatcher": item.get("dispatcher", ""),
+            "arg": item.get("arg", ""),
+            "category": category
+        })
+
+    # Sort by combo
+    parsed.sort(key=lambda x: (x["category"], x["combo"]))
+    return parsed
+
+
+def backup_bindings():
+    """Create timestamped backup of bindings.lua."""
+    if BINDINGS_FILE.exists():
+        backup_path = BINDINGS_FILE.with_suffix(f".lua.bak.{int(time.time())}")
+        shutil.copy2(BINDINGS_FILE, backup_path)
+
+
+def add_or_update_binding(combo: str, description: str, action: str) -> bool:
+    """Safely append or update a binding in bindings.lua."""
+    backup_bindings()
+    combo = combo.strip().upper()
+    description = description.strip()
+    action = action.strip()
+
+    content = BINDINGS_FILE.read_text(encoding="utf-8") if BINDINGS_FILE.exists() else ""
+
+    # Format Lua statement
+    new_lua_entry = f'\n-- Custom binding: {description}\nhl.unbind("{combo}")\n'
+    if action.startswith("http://") or action.startswith("https://"):
+        new_lua_entry += f'o.bind("{combo}", "{description}", {{ webapp = "{action}" }})\n'
+    elif action.startswith("omarchy:"):
+        omarchy_target = action.split(":", 1)[1]
+        new_lua_entry += f'o.bind("{combo}", "{description}", {{ omarchy = "{omarchy_target}" }})\n'
+    else:
+        new_lua_entry += f'o.bind("{combo}", "{description}", "{action}")\n'
+
+    content += new_lua_entry
+    BINDINGS_FILE.write_text(content, encoding="utf-8")
+
+    # Reload compositor
+    subprocess.run(["hyprctl", "reload"], capture_output=True)
+    return True
+
+
+def remove_binding(combo: str) -> bool:
+    """Unbind a shortcut in bindings.lua."""
+    backup_bindings()
+    combo = combo.strip().upper()
+    content = BINDINGS_FILE.read_text(encoding="utf-8") if BINDINGS_FILE.exists() else ""
+    content += f'\n-- Unbound via Keybind Editor\nhl.unbind("{combo}")\n'
+    BINDINGS_FILE.write_text(content, encoding="utf-8")
+    subprocess.run(["hyprctl", "reload"], capture_output=True)
+    return True
+
+
+def main():
+    if len(sys.argv) < 2:
+        print("Usage: keybind-manager [list|add|remove|search]")
+        sys.exit(1)
+
+    cmd = sys.argv[1]
+
+    if cmd == "list":
+        binds = get_live_binds()
+        print(json.dumps({"binds": binds, "count": len(binds)}))
+
+    elif cmd == "search":
+        query = sys.argv[2].lower() if len(sys.argv) > 2 else ""
+        binds = get_live_binds()
+        filtered = [b for b in binds if query in b["combo"].lower() or query in b["description"].lower()]
+        print(json.dumps({"binds": filtered, "count": len(filtered)}))
+
+    elif cmd == "add":
+        if len(sys.argv) < 5:
+            print(json.dumps({"error": "Usage: keybind-manager add <combo> <description> <action>"}))
+            sys.exit(1)
+        combo, desc, action = sys.argv[2], sys.argv[3], sys.argv[4]
+        success = add_or_update_binding(combo, desc, action)
+        print(json.dumps({"success": success, "combo": combo}))
+
+    elif cmd == "remove":
+        if len(sys.argv) < 3:
+            print(json.dumps({"error": "Usage: keybind-manager remove <combo>"}))
+            sys.exit(1)
+        combo = sys.argv[2]
+        success = remove_binding(combo)
+        print(json.dumps({"success": success, "combo": combo}))
+
+
+if __name__ == "__main__":
+    main()
